@@ -1,13 +1,34 @@
-import { useMemo } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useAppStore } from "../stores/useAppStore";
 
 export default function Header() {
+  const [searchFilters, setSearchFilters] = useState({
+    ingredient: "",
+    category: "",
+  });
   const { pathname } = useLocation();
 
   const isHome = useMemo(() => pathname === "/", [pathname]);
+  const { fetchCategories, categories } = useAppStore();
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>
+  ) {
+    setSearchFilters({
+      ...searchFilters,
+      [e.target.name]: e.target.value,
+    });
+  }
 
   return (
-    <header className="bg-slate-800">
+    <header
+      className={isHome ? "bg-header bg-center bg-cover" : "bg-slate-800"}
+    >
       <div className="mx-auto container px-5 py-16">
         <div className="flex justify-between items-center">
           <div>
@@ -51,6 +72,8 @@ export default function Header() {
                 id="ingredient"
                 className="p-3 w-full rounded-lg focus:outline-none"
                 placeholder="Name or Ingredient. (Vodka, Tequila, Coffee"
+                onChange={handleChange}
+                value={searchFilters.ingredient}
               />
             </div>
             <div className="space-y-4">
@@ -61,11 +84,20 @@ export default function Header() {
                 Category
               </label>
               <select
-                name="ingredient"
-                id="ingredient"
+                name="category"
+                id="category"
                 className="p-3 w-full rounded-lg focus:outline-none"
+                onChange={handleChange}
+                value={searchFilters.category}
               >
                 <option value={""}>-- Select --</option>
+                {categories.drinks.map(({ strCategory }) => {
+                  return (
+                    <option key={strCategory} value={strCategory}>
+                      {strCategory}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <input
