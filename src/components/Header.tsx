@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAppStore } from "../stores/useAppStore";
 
@@ -10,7 +10,7 @@ export default function Header() {
   const { pathname } = useLocation();
 
   const isHome = useMemo(() => pathname === "/", [pathname]);
-  const { fetchCategories, categories } = useAppStore();
+  const { fetchCategories, categories, searchRecipes } = useAppStore();
 
   useEffect(() => {
     fetchCategories();
@@ -23,6 +23,16 @@ export default function Header() {
       ...searchFilters,
       [e.target.name]: e.target.value,
     });
+  }
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    //TODO: validate
+    if (Object.values(searchFilters).includes("")) {
+      return;
+    }
+
+    searchRecipes(searchFilters);
   }
 
   return (
@@ -58,7 +68,10 @@ export default function Header() {
           </nav>
         </div>
         {isHome && (
-          <form className="md:w-1/2 2xl:2-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 ">
+          <form
+            className="md:w-1/2 2xl:2-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 "
+            onSubmit={handleSubmit}
+          >
             <div className="space-y-4">
               <label
                 htmlFor="ingredient"
